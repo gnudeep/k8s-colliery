@@ -20,13 +20,10 @@ sudo swapoff -a
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
 #Install Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
 if [ "$DISTRO" == "Debian"]; then
+  curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
   if [ "$OS_VERSION" == "stretch" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
-  elif [ "$OS_VERSION" == "bullseye" ]; then
-      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
   elif [ "$OS_VERSION" == "buster" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
   elif [ "$OS_VERSION" == "bullseye" ]; then
@@ -36,6 +33,7 @@ if [ "$DISTRO" == "Debian"]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
    fi
 elif [ "$DISTRO" == "Ubuntu"]; then
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   if [ "$OS_VERSION" == "16.04" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
   elif [ "$OS_VERSION" == "18.04" ]; then
@@ -47,7 +45,6 @@ elif [ "$DISTRO" == "Ubuntu"]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
    fi
 fi
-
 
 sudo apt-get update
 sudo apt-get install -y containerd.io docker-ce docker-ce-cli

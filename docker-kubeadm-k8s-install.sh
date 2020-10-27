@@ -23,7 +23,11 @@ sudo apt-get install -y apt-transport-https ca-certificates curl software-proper
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
 if [ "$DISTRO" == "Debian"]; then
-  if [ "$OS_VERSION" == "buster" ]; then
+  if [ "$OS_VERSION" == "stretch" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+  elif [ "$OS_VERSION" == "bullseye" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+  elif [ "$OS_VERSION" == "buster" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
   elif [ "$OS_VERSION" == "bullseye" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"

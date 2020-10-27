@@ -1,6 +1,6 @@
 #!/bin/bash
-
-UBUNTU_VERSION=20.04
+DISTRO=Ubuntu
+OS_VERSION=20.04
 K8S_VERSION=1.19.3-00
 node_type=master
 
@@ -22,16 +22,29 @@ sudo apt-get install -y apt-transport-https ca-certificates curl software-proper
 #Install Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-if [ "$UBUNTU_VERSION" == "16.04" ]; then
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
-elif [ "$UBUNTU_VERSION" == "18.04" ]; then
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-elif [ "$UBUNTU_VERSION" == "20.04" ]; then
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-else
-    #default tested version
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+if [ "$DISTRO" == "Debian"]; then
+  if [ "$OS_VERSION" == "buster" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+  elif [ "$OS_VERSION" == "bullseye" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+  else
+      #default tested version
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+   fi
+elif [ "$DISTRO" == "Ubuntu"]; then
+  if [ "$OS_VERSION" == "16.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+  elif [ "$OS_VERSION" == "18.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+  elif [ "$OS_VERSION" == "20.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+  else
+      #default tested version
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+   fi
 fi
+
+
 sudo apt-get update
 sudo apt-get install -y containerd.io docker-ce docker-ce-cli
 

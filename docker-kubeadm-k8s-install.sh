@@ -73,7 +73,6 @@ sudo systemctl enable docker
 #Install NFS client
 sudo apt-get install -y nfs-common
 
-sudo sysctl --system
 #Update the apt source list
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] http://apt.kubernetes.io/ kubernetes-xenial main"

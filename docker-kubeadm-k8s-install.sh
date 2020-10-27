@@ -4,7 +4,8 @@ OS_VERSION=20.04
 K8S_VERSION=1.19.3-00
 node_type=master
 
-echo "Ubuntu version: ${UBUNTU_VERSION}"
+echo "Distribution: ${DISTRO}"
+echo "OS version: ${OS_VERSION}"
 echo "K8s version: ${K8S_VERSION}"
 echo "K8s node type: ${node_type}"
 echo
@@ -20,19 +21,19 @@ sudo swapoff -a
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
 #Install Docker
-if [ "$DISTRO" == "Debian"]; then
+if [ "$DISTRO" == "Debian" ]; then
   curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-  if [ "$OS_VERSION" == "stretch" ]; then
+  if [ "$OS_VERSION" == "9" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
-  elif [ "$OS_VERSION" == "buster" ]; then
+  elif [ "$OS_VERSION" == "10" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
-  elif [ "$OS_VERSION" == "bullseye" ]; then
+  elif [ "$OS_VERSION" == "11" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
   else
       #default tested version
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
    fi
-elif [ "$DISTRO" == "Ubuntu"]; then
+elif [ "$DISTRO" == "Ubuntu" ]; then
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   if [ "$OS_VERSION" == "16.04" ]; then
       sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"

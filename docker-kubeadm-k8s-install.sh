@@ -97,7 +97,7 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.13.0/Documentation/kube-flannel.yml
 
 #Install Kubernetes Dashboard
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml
 
 #Add an service account
 cat <<EOF | kubectl apply -f -

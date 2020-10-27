@@ -1,10 +1,11 @@
 #!/bin/bash
-
-UBUNTU_VERSION=16.04
-K8S_VERSION=1.11.3-00
+DISTRO=Ubuntu
+OS_VERSION=20.04
+K8S_VERSION=1.19.3-00
 node_type=master
 
-echo "Ubuntu version: ${UBUNTU_VERSION}"
+echo "Distribution: ${DISTRO}"
+echo "OS version: ${OS_VERSION}"
 echo "K8s version: ${K8S_VERSION}"
 echo "K8s node type: ${node_type}"
 echo
@@ -20,24 +21,57 @@ sudo swapoff -a
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
 #Install Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-if [ $UBUNTU_VERSION == "16.04" ]; then
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
-elif [ $UBUNTU_VERSION == "18.04" ]; then
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-else
-    #default tested version
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+if [ "$DISTRO" == "Debian" ]; then
+  curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+  if [ "$OS_VERSION" == "9" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+  elif [ "$OS_VERSION" == "10" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+  elif [ "$OS_VERSION" == "11" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+  else
+      #default tested version
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+   fi
+elif [ "$DISTRO" == "Ubuntu" ]; then
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  if [ "$OS_VERSION" == "16.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+  elif [ "$OS_VERSION" == "18.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+  elif [ "$OS_VERSION" == "20.04" ]; then
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+  else
+      #default tested version
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+   fi
 fi
+
 sudo apt-get update
-sudo apt-get install -y docker.io
+sudo apt-get install -y containerd.io docker-ce docker-ce-cli
+
+# Create required directories
+sudo mkdir -p /etc/systemd/system/docker.service.d
+
+# Create daemon json config file
+sudo tee /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+# Start and enable Services
+sudo systemctl daemon-reload 
+sudo systemctl restart docker
+sudo systemctl enable docker
 
 #Install NFS client
 sudo apt-get install -y nfs-common
-
-#Enable docker service
-sudo systemctl enable docker.service
 
 #Update the apt source list
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -48,6 +82,10 @@ sudo apt-get update
 sudo apt-get install -y kubelet=$K8S_VERSION kubeadm=$K8S_VERSION kubectl=$K8S_VERSION
 
 sudo apt-mark hold kubelet kubeadm kubectl
+
+sudo systemctl enable kubelet
+
+sudo kubeadm config images pull
 
 #Initialize the k8s cluster
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
@@ -70,6 +108,33 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
 #Install Flannel network
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.13.0/Documentation/kube-flannel.yml
+
+#Install Kubernetes Dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml
+
+#Add an service account
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
 
 echo "Done."
